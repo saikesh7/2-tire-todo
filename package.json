@@ -1,0 +1,12 @@
+{
+  "name": "2-tire-todo",
+  "version": "1.0.0",
+  "description": "A simple 2-tier TODO application with Flask backend and vanilla JavaScript frontend",
+  "scripts": {
+    "start": "python app.py",
+    "install-deps": "pip install -r requirements.txt"
+  },
+  "keywords": ["todo", "flask", "javascript"],
+  "author": "",
+  "license": "ISC"
+}
