@@ -1,0 +1,52 @@
+name: CI/CD Deployment Pipeline
+
+# This workflow runs on pushes to these specific branches
+on:
+  push:
+    branches:
+      - develop  # Deploys to dev
+      - staging  # Deploys to test
+      - main     # Deploys to prod
+
+jobs:
+  # Job for deploying to the Staging server (dev and test environments)
+  deploy-staging:
+    if: github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/staging'
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Deploy to Dev Environment
+        if: github.ref == 'refs/heads/develop'
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.STAGING_EC2_HOST }}
+          username: ${{ secrets.STAGING_EC2_USERNAME }}
+          key: ${{ secrets.STAGING_EC2_KEY }}
+          script: |
+            sudo /usr/local/bin/deploy.sh dev
+
+      - name: Deploy to Test Environment
+        if: github.ref == 'refs/heads/staging'
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.STAGING_EC2_HOST }}
+          username: ${{ secrets.STAGING_EC2_USERNAME }}
+          key: ${{ secrets.STAGING_EC2_KEY }}
+          script: |
+            sudo /usr/local/bin/deploy.sh test
+
+  # Job for deploying to the Production server
+  deploy-production:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: production # Allows for protection rules like manual approval
+    
+    steps:
+      - name: Deploy to Production Environment
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.PROD_EC2_HOST }}
+          username: ${{ secrets.PROD_EC2_USERNAME }}
+          key: ${{ secrets.PROD_EC2_KEY }}
+          script: |
+            sudo /usr/local/bin/deploy.sh prod
